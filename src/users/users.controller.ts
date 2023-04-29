@@ -1,14 +1,23 @@
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { ChangePasswordDto, UpdateProfileDto } from './dto/users.dto';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('/:id')
-  async getUserById(@Param() params: { id: string }){
-    return await this.usersService.getUserById(parseInt(params.id));
+  @Get('/profile')
+  async getUserProfile(@Req() req) {
+    return await this.usersService.getUserProfile(req);
+  }
+
+  @Post('/change-password')
+  async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
+    return await this.usersService.changePassword(req, dto);
+  }
+
+  @Post('/update-profile')
+  async updateProfile(@Req() req, @Body() dto: UpdateProfileDto) {
+    return await this.usersService.updateProfile(req, dto);
   }
 }

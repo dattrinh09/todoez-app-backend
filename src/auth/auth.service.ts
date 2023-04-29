@@ -41,7 +41,7 @@ export class AuthService {
             template: 'index',
             context: {
                 text: 'Click link below to verify your email',
-                link: `http://127.0.0.1:3000/auth/verify-email?email=${createdUser.email}&token=${token}`,
+                link: `http://localhost:3000/auth/verify-email?email=${createdUser.email}&token=${token}`,
             }
         });
 
@@ -74,6 +74,7 @@ export class AuthService {
     async forgotPassword(email: string) {
         const foundUser = await this.prisma.user.findUnique({ where: { email } });
         if (!foundUser) throw new BadRequestException('Email does not exists');
+        if (!foundUser.hash_password) throw new BadRequestException('This email use for google signin function');
         if (!foundUser.is_verify) throw new BadRequestException('Account is not verify');
 
         const token = await this.signToken(foundUser.id, foundUser.email);
@@ -84,7 +85,7 @@ export class AuthService {
             template: 'index',
             context: {
                 text: 'Click link below to reset your password',
-                link: `http://127.0.0.1:3000/auth/reset-password?email=${foundUser.email}&token=${token}`,
+                link: `http://localhost:3000/auth/reset-password?email=${foundUser.email}&token=${token}`,
             }
         });
 
@@ -144,6 +145,8 @@ export class AuthService {
             idToken: googleToken,
             audience: googleOauthConstants.clientID,
         });
+
+        if (!ticket) throw new BadRequestException("Google signin fail");
 
         const user = await this.createGoogleUser(ticket.getPayload().email, ticket.getPayload().name);
         const token = await this.signToken(user.id, user.email);
