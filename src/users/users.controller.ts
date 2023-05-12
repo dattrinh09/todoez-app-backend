@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Put, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ChangePasswordDto, UpdateProfileDto } from './dto/users.dto';
 
@@ -11,12 +11,12 @@ export class UsersController {
     return await this.usersService.getUserProfile(req);
   }
 
-  @Post('/change-password')
+  @Put('/change-password')
   async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
     return await this.usersService.changePassword(req, dto);
   }
 
-  @Post('/update-profile')
+  @Put('/update-profile')
   async updateProfile(@Req() req, @Body() dto: UpdateProfileDto) {
     return await this.usersService.updateProfile(req, dto);
   }

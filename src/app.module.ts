@@ -6,6 +6,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConstants } from './utils/constants';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { TeamUsersModule } from './team-users/team-users.module';
+import { TeamsModule } from './teams/teams.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         },
       }),
     }),
+    TeamUsersModule,
+    TeamsModule,
   ],
 })
 export class AppModule {}

@@ -11,12 +11,30 @@ datasource db {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   fullname      String
-  email         String   @unique
+  email         String     @unique
   phone_number  String
   hash_password String
-  is_verify     Boolean  @default(false)
-  create_time   DateTime @default(now())
-  update_time   DateTime @updatedAt()
+  is_verify     Boolean    @default(false)
+  create_time   DateTime   @default(now())
+  update_time   DateTime   @updatedAt()
+  team_users    TeamUser[]
+}
+
+model Team {
+  id         Int        @id @default(autoincrement())
+  name       String
+  team_users TeamUser[]
+}
+
+model TeamUser {
+  id         Int     @id @default(autoincrement())
+  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id    Int
+  team       Team    @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  team_id    Int
+  is_creator Boolean @default(false)
+
+  @@unique([user_id, team_id])
 }
