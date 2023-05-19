@@ -10,9 +10,9 @@ export class UsersService {
     constructor(private prisma: PrismaService) { }
 
     async getUserProfile(req: Request) {
-        const { sub } = req.user as ReqUser;
+        const { sub: id } = req.user as ReqUser;
 
-        const user = await this.prisma.user.findUnique({ where: { id: sub } });
+        const user = await this.prisma.user.findUnique({ where: { id } });
         if (!user) throw new BadRequestException('User not found');
 
         const is_email_signin = !!user.hash_password;
@@ -26,10 +26,10 @@ export class UsersService {
     }
 
     async changePassword(req: Request, dto: ChangePasswordDto) {
-        const { sub } = req.user as ReqUser;
+        const { sub: id } = req.user as ReqUser;
         const { currentPassword, newPassword } = dto;
 
-        const user = await this.prisma.user.findUnique({ where: { id: sub } });
+        const user = await this.prisma.user.findUnique({ where: { id } });
         if (!user) throw new BadRequestException('User not found');
 
         const isMatch = await this.comparePassword(currentPassword, user.hash_password);
@@ -38,7 +38,7 @@ export class UsersService {
 
         const hash_password = await this.hashPassword(newPassword);
         await this.prisma.user.update({
-            where: { id: user.id },
+            where: { id },
             data: {
                 hash_password,
             }
@@ -48,14 +48,14 @@ export class UsersService {
     }
 
     async updateProfile(req: Request, dto: UpdateProfileDto) {
-        const { sub } = req.user as ReqUser;
+        const { sub: id } = req.user as ReqUser;
         const { fullname, phone_number } = dto;
 
-        const user = await this.prisma.user.findUnique({ where: { id: sub } });
+        const user = await this.prisma.user.findUnique({ where: { id } });
         if (!user) throw new BadRequestException('User not found');
 
         const updatedUser = await this.prisma.user.update({
-            where: { id: user.id },
+            where: { id },
             data: {
                 fullname,
                 phone_number

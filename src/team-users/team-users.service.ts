@@ -9,7 +9,7 @@ export class TeamUsersService {
     constructor(private prisma: PrismaService) { }
 
     async addUserToTeam(req: Request, team_id: number, dto: TeamUsersDto) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
         const { email } = dto;
 
         const team = await this.prisma.team.findUnique({ where: { id: team_id } });
@@ -18,8 +18,8 @@ export class TeamUsersService {
         const creator = await this.prisma.teamUser.findUnique({
             where: {
                 user_id_team_id: {
-                    user_id: sub,
-                    team_id: team.id,
+                    user_id,
+                    team_id,
                 },
             }
         });
@@ -33,7 +33,7 @@ export class TeamUsersService {
             where: {
                 user_id_team_id: {
                     user_id: user.id,
-                    team_id: team.id,
+                    team_id,
                 },
             }
         });
@@ -42,13 +42,13 @@ export class TeamUsersService {
         return await this.prisma.teamUser.create({
             data: {
                 user_id: user.id,
-                team_id: team.id,
+                team_id,
             },
         });
     }
 
     async getUsersInTeam(req: Request, team_id: number) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
 
         const team = await this.prisma.team.findUnique({ where: { id: team_id } });
         if (!team) throw new BadRequestException('Team not found');
@@ -56,8 +56,8 @@ export class TeamUsersService {
         const user = await this.prisma.teamUser.findUnique({
             where: {
                 user_id_team_id: {
-                    user_id: sub,
-                    team_id: team.id,
+                    user_id,
+                    team_id,
                 },
             }
         });
@@ -82,7 +82,7 @@ export class TeamUsersService {
     }
 
     async deleteUserFromTeam(req: Request, team_id: number, id: number) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
 
         const team = await this.prisma.team.findUnique({ where: { id: team_id } });
         if (!team) throw new BadRequestException('Team not found');
@@ -90,8 +90,8 @@ export class TeamUsersService {
         const creator = await this.prisma.teamUser.findUnique({
             where: {
                 user_id_team_id: {
-                    user_id: sub,
-                    team_id: team.id,
+                    user_id,
+                    team_id,
                 },
             }
         });
