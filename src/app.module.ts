@@ -8,6 +8,8 @@ import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TeamUsersModule } from './team-users/team-users.module';
 import { TeamsModule } from './teams/teams.module';
+import { ProjectsModule } from './projects/projects.module';
+import { ProjectUsersModule } from './project-users/project-users.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { TeamsModule } from './teams/teams.module';
     }),
     TeamUsersModule,
     TeamsModule,
+    ProjectsModule,
+    ProjectUsersModule,
   ],
 })
 export class AppModule {}

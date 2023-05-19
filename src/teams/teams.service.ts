@@ -9,7 +9,7 @@ export class TeamsService {
     constructor(private prisma: PrismaService) { }
 
     async createTeam(req: Request, dto: TeamDto) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
         const { name } = dto;
 
         const newTeam = await this.prisma.team.create({
@@ -18,7 +18,7 @@ export class TeamsService {
 
         await this.prisma.teamUser.create({
             data: {
-                user_id: sub,
+                user_id,
                 team_id: newTeam.id,
                 is_creator: true,
             }
@@ -28,16 +28,16 @@ export class TeamsService {
     }
 
     async getTeams(req: Request) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
         return await this.prisma.team.findMany({
             where: {
-                team_users: { some: { user_id: sub } },
+                team_users: { some: { user_id } },
             }
         });
     }
 
     async getTeamById(req: Request, id: number) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
 
         const team = await this.prisma.team.findUnique({ where: { id } });
         if (!team) throw new BadRequestException('Team not found');
@@ -45,21 +45,24 @@ export class TeamsService {
         const teamUser = await this.prisma.teamUser.findUnique({
             where: {
                 user_id_team_id: {
-                    user_id: sub,
-                    team_id: team.id,
+                    user_id,
+                    team_id: id,
                 },
             }
         });
         if (!teamUser) throw new UnauthorizedException();
 
-        return { 
+        const userNumber = await this.prisma.teamUser.count({ where: { team_id: id } });
+
+        return {
             is_creator: teamUser.is_creator,
+            user_number: userNumber,
             team,
-         };
+        };
     }
 
     async updateTeam(req: Request, id: number, dto: TeamDto) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
         const { name } = dto;
 
         const team = await this.prisma.team.findUnique({ where: { id } });
@@ -68,15 +71,15 @@ export class TeamsService {
         const teamUser = await this.prisma.teamUser.findUnique({
             where: {
                 user_id_team_id: {
-                    user_id: sub,
-                    team_id: team.id,
+                    user_id,
+                    team_id: id,
                 },
             }
         });
         if (!teamUser.is_creator) throw new UnauthorizedException();
 
         return await this.prisma.team.update({
-            where: { id: team.id },
+            where: { id },
             data: {
                 name
             },
@@ -84,7 +87,7 @@ export class TeamsService {
     }
 
     async deleteTeam(req: Request, id: number) {
-        const { sub } = req.user as ReqUser;
+        const { sub: user_id } = req.user as ReqUser;
 
         const team = await this.prisma.team.findUnique({ where: { id } });
         if (!team) throw new BadRequestException('Team not found');
@@ -92,14 +95,14 @@ export class TeamsService {
         const teamUser = await this.prisma.teamUser.findUnique({
             where: {
                 user_id_team_id: {
-                    user_id: sub,
-                    team_id: team.id,
+                    user_id,
+                    team_id: id,
                 },
             }
         });
         if (!teamUser.is_creator) throw new UnauthorizedException();
 
-        await this.prisma.team.delete({ where: { id: team.id } });
+        await this.prisma.team.delete({ where: { id } });
 
         return { message: 'Delete team successfully' };
     }

@@ -162,7 +162,6 @@ export class AuthService {
         return { message: 'signout successfully' };
     }
 
-    
     async createGoogleUser(email: string, name: string) {
         const user = await this.prisma.user.findUnique({ where: { email } });
         if (user) return user;
