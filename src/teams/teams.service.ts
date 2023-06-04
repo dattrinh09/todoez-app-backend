@@ -76,7 +76,7 @@ export class TeamsService {
                 },
             }
         });
-        if (!teamUser.is_creator) throw new UnauthorizedException();
+        if (!teamUser || !teamUser.is_creator) throw new UnauthorizedException();
 
         return await this.prisma.team.update({
             where: { id },
@@ -100,7 +100,7 @@ export class TeamsService {
                 },
             }
         });
-        if (!teamUser.is_creator) throw new UnauthorizedException();
+        if (!teamUser || !teamUser.is_creator) throw new UnauthorizedException();
 
         await this.prisma.team.delete({ where: { id } });
 

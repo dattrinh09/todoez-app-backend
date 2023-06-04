@@ -11,6 +11,7 @@ import { TeamsModule } from './teams/teams.module';
 import { ProjectsModule } from './projects/projects.module';
 import { ProjectUsersModule } from './project-users/project-users.module';
 import { SprintsModule } from './sprints/sprints.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { SprintsModule } from './sprints/sprints.module';
     ProjectsModule,
     ProjectUsersModule,
     SprintsModule,
+    TasksModule,
   ],
 })
 export class AppModule {}

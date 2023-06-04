@@ -24,9 +24,9 @@ CREATE TABLE "Team" (
 -- CreateTable
 CREATE TABLE "TeamUser" (
     "id" SERIAL NOT NULL,
+    "is_creator" BOOLEAN NOT NULL DEFAULT false,
     "user_id" INTEGER NOT NULL,
     "team_id" INTEGER NOT NULL,
-    "is_creator" BOOLEAN NOT NULL DEFAULT false,
 
     CONSTRAINT "TeamUser_pkey" PRIMARY KEY ("id")
 );
@@ -65,13 +65,16 @@ CREATE TABLE "Sprint" (
 -- CreateTable
 CREATE TABLE "Task" (
     "id" SERIAL NOT NULL,
+    "type" TEXT NOT NULL,
     "content" TEXT NOT NULL,
-    "status" INTEGER NOT NULL,
-    "priority" INTEGER NOT NULL,
-    "start_time" TIMESTAMP(3) NOT NULL,
+    "status" TEXT NOT NULL DEFAULT 'assign',
+    "priority" TEXT NOT NULL,
+    "create_time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "update_time" TIMESTAMP(3) NOT NULL,
     "end_time" TIMESTAMP(3) NOT NULL,
     "sprint_id" INTEGER NOT NULL,
-    "project_user_id" INTEGER NOT NULL,
+    "reporter_id" INTEGER NOT NULL,
+    "assignee_id" INTEGER NOT NULL,
 
     CONSTRAINT "Task_pkey" PRIMARY KEY ("id")
 );
@@ -82,7 +85,7 @@ CREATE TABLE "Comment" (
     "content" TEXT NOT NULL,
     "create_time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "task_id" INTEGER NOT NULL,
-    "project_user_id" INTEGER NOT NULL,
+    "user_id" INTEGER NOT NULL,
 
     CONSTRAINT "Comment_pkey" PRIMARY KEY ("id")
 );
@@ -115,10 +118,13 @@ ALTER TABLE "Sprint" ADD CONSTRAINT "Sprint_project_id_fkey" FOREIGN KEY ("proje
 ALTER TABLE "Task" ADD CONSTRAINT "Task_sprint_id_fkey" FOREIGN KEY ("sprint_id") REFERENCES "Sprint"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Task" ADD CONSTRAINT "Task_project_user_id_fkey" FOREIGN KEY ("project_user_id") REFERENCES "ProjectUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Task" ADD CONSTRAINT "Task_reporter_id_fkey" FOREIGN KEY ("reporter_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Task" ADD CONSTRAINT "Task_assignee_id_fkey" FOREIGN KEY ("assignee_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Comment" ADD CONSTRAINT "Comment_task_id_fkey" FOREIGN KEY ("task_id") REFERENCES "Task"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Comment" ADD CONSTRAINT "Comment_project_user_id_fkey" FOREIGN KEY ("project_user_id") REFERENCES "ProjectUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Comment" ADD CONSTRAINT "Comment_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

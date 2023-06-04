@@ -95,7 +95,7 @@ export class TeamUsersService {
                 },
             }
         });
-        if (!creator.is_creator) throw new UnauthorizedException('You are not team creator');
+        if (!creator || !creator.is_creator) throw new UnauthorizedException('You are not team creator');
 
         if (creator.id === id) throw new BadRequestException('Can not delete team creator');
 

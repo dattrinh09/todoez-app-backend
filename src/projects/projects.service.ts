@@ -58,10 +58,12 @@ export class ProjectsService {
         if (!projectUser) throw new UnauthorizedException();
 
         const userNumber = await this.prisma.projectUser.count({ where: { project_id: id } });
+        const sprintNumber = await this.prisma.sprint.count({ where: { project_id: id } });
 
         return {
             is_creator: projectUser.is_creator,
             user_number: userNumber,
+            sprint_number: sprintNumber,
             project,
         }
     }
@@ -81,7 +83,7 @@ export class ProjectsService {
                 },
             },
         });
-        if (!projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
+        if (!projectUser || !projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
 
         return await this.prisma.project.update({
             where: { id },
@@ -106,7 +108,7 @@ export class ProjectsService {
                 }
             }
         });
-        if (!projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
+        if (!projectUser || !projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
 
         await this.prisma.project.delete({ where: { id } });
 
