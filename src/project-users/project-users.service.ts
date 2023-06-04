@@ -95,7 +95,7 @@ export class ProjectUsersService {
                 },
             }
         });
-        if (!creator.is_creator) throw new UnauthorizedException('You are not project creator');
+        if (!creator || !creator.is_creator) throw new UnauthorizedException('You are not project creator');
         if (creator.id === id) throw new BadRequestException('Can not delete project creator');
 
         const projectUser = await this.prisma.projectUser.findUnique({ where: { id } });

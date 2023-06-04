@@ -33,17 +33,17 @@ export class AuthService {
             }
         });
 
-        const token = await this.signToken(createdUser.id, createdUser.email);
+        // const token = await this.signToken(createdUser.id, createdUser.email);
 
-        await this.mailer.sendMail({
-            to: createdUser.email,
-            subject: 'Welcome to website',
-            template: 'index',
-            context: {
-                text: 'Click link below to verify your email',
-                link: `http://localhost:3000/auth/verify-email?email=${createdUser.email}&token=${token}`,
-            }
-        });
+        // await this.mailer.sendMail({
+        //     to: createdUser.email,
+        //     subject: 'Welcome to website',
+        //     template: 'index',
+        //     context: {
+        //         text: 'Click link below to verify your email',
+        //         link: `http://localhost:3000/auth/verify-email?email=${createdUser.email}&token=${token}`,
+        //     }
+        // });
 
         return { message: 'Signup successfully' };
     }
