@@ -10,39 +10,38 @@ export class TasksService {
 
     async createTask(req: Request, project_id: number, dto: TaskCreateDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { end_time, sprint_id, assignee_id } = dto;
+        const { end_at, sprint_id, assignee_id } = dto;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
+        const project = await this.prisma.project.findUnique({
+            where: { id: project_id }
+        });
         if (!project) throw new BadRequestException('Project not found');
 
-        const projectUser = await this.prisma.projectUser.findUnique({
+        const reporter = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
                     user_id,
-                    project_id
-                }
-            }
-        });
-        if (!projectUser) throw new UnauthorizedException();
-
-        const sprint = await this.prisma.sprint.findUnique({ where: { id: sprint_id } });
-        if (!sprint) throw new BadRequestException('sprint not found');
-
-        const assignee = await this.prisma.projectUser.findUnique({
-            where: {
-                user_id_project_id: {
-                    user_id: assignee_id,
                     project_id,
                 }
             }
         });
-        if (!assignee) throw new BadRequestException('Assignee not exist in this project');
+        if (!reporter || reporter.delete_at) throw new UnauthorizedException();
+
+        const sprint = await this.prisma.sprint.findUnique({
+            where: { id: sprint_id }
+        });
+        if (!sprint) throw new BadRequestException('sprint not found');
+
+        const assignee = await this.prisma.projectUser.findUnique({
+            where: { id: assignee_id }
+        });
+        if (!assignee || assignee.delete_at) throw new BadRequestException('Assignee not exist in this project');
 
         return await this.prisma.task.create({
             data: {
                 ...dto,
-                end_time: new Date(end_time),
-                reporter_id: user_id,
+                end_at: new Date(end_at),
+                reporter_id: reporter.id,
             }
         })
     }
@@ -61,7 +60,9 @@ export class TasksService {
     ) {
         const { sub: user_id } = req.user as ReqUser;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
+        const project = await this.prisma.project.findUnique({
+            where: { id: project_id }
+        });
         if (!project) throw new BadRequestException('Project not found');
 
         const projectUser = await this.prisma.projectUser.findUnique({
@@ -72,7 +73,7 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
 
         const total = await this.prisma.task.count({
             where: {
@@ -102,9 +103,9 @@ export class TasksService {
                 content: true,
                 status: true,
                 priority: true,
-                create_time: true,
-                update_time: true,
-                end_time: true,
+                create_at: true,
+                update_at: true,
+                end_at: true,
                 sprint: {
                     select: {
                         id: true,
@@ -114,13 +115,23 @@ export class TasksService {
                 reporter: {
                     select: {
                         id: true,
-                        fullname: true,
+                        user: {
+                            select: {
+                                email: true,
+                                fullname: true,
+                            }
+                        },
                     }
                 },
                 assignee: {
                     select: {
                         id: true,
-                        fullname: true,
+                        user: {
+                            select: {
+                                email: true,
+                                fullname: true,
+                            }
+                        },
                     }
                 },
             },
@@ -159,7 +170,9 @@ export class TasksService {
     async getTaskById(req: Request, project_id: number, id: number) {
         const { sub: user_id } = req.user as ReqUser;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
+        const project = await this.prisma.project.findUnique({
+            where: { id: project_id }
+        });
         if (!project) throw new BadRequestException('Project not found');
 
         const projectUser = await this.prisma.projectUser.findUnique({
@@ -170,18 +183,19 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
 
         return await this.prisma.task.findUnique({
             select: {
                 id: true,
                 type: true,
                 content: true,
+                description: true,
                 status: true,
                 priority: true,
-                create_time: true,
-                update_time: true,
-                end_time: true,
+                create_at: true,
+                update_at: true,
+                end_at: true,
                 sprint: {
                     select: {
                         id: true,
@@ -191,13 +205,23 @@ export class TasksService {
                 reporter: {
                     select: {
                         id: true,
-                        fullname: true,
+                        user: {
+                            select: {
+                                email: true,
+                                fullname: true,
+                            }
+                        },
                     }
                 },
                 assignee: {
                     select: {
                         id: true,
-                        fullname: true,
+                        user: {
+                            select: {
+                                email: true,
+                                fullname: true,
+                            }
+                        },
                     }
                 },
             },
@@ -207,9 +231,11 @@ export class TasksService {
 
     async updateTask(req: Request, project_id: number, id: number, dto: TaskUpdateDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { end_time, sprint_id, assignee_id, reporter_id } = dto;
+        const { end_at, sprint_id, assignee_id, reporter_id } = dto;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
+        const project = await this.prisma.project.findUnique({
+            where: { id: project_id }
+        });
         if (!project) throw new BadRequestException('Project not found');
 
         const projectUser = await this.prisma.projectUser.findUnique({
@@ -220,47 +246,39 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
 
-        const sprint = await this.prisma.sprint.findUnique({ where: { id: sprint_id } });
+        const sprint = await this.prisma.sprint.findUnique({
+            where: { id: sprint_id }
+        });
         if (!sprint) throw new BadRequestException('sprint not found');
 
         const assignee = await this.prisma.projectUser.findUnique({
-            where: {
-                user_id_project_id: {
-                    user_id: assignee_id,
-                    project_id,
-                }
-            }
+            where: { id: assignee_id }
         });
-        if (!assignee) throw new BadRequestException('Assignee not exist in this project');
+        if (!assignee || assignee.delete_at) throw new BadRequestException('Assignee not exist in this project');
 
 
         const reporter = await this.prisma.projectUser.findUnique({
-            where: {
-                user_id_project_id: {
-                    user_id: reporter_id,
-                    project_id,
-                }
-            }
+            where: { id: reporter_id }
         });
-        if (!reporter) throw new BadRequestException('Reporter not exist in this project');
+        if (!reporter || reporter.delete_at) throw new BadRequestException('Reporter not exist in this project');
 
-        await this.prisma.task.update({
+        return await this.prisma.task.update({
             data: {
                 ...dto,
-                end_time: new Date(end_time),
+                end_at: new Date(end_at),
             },
             where: { id },
         });
-
-        return { message: 'Update task successfully ' };
     }
 
     async deleteTask(req: Request, project_id: number, id: number) {
         const { sub: user_id } = req.user as ReqUser;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
+        const project = await this.prisma.project.findUnique({
+            where: { id: project_id }
+        });
         if (!project) throw new BadRequestException('Project not found');
 
         const projectUser = await this.prisma.projectUser.findUnique({
@@ -271,7 +289,7 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
 
         const task = await this.prisma.task.findUnique({ where: { id } });
         if (!task) throw new BadRequestException('Task not found');

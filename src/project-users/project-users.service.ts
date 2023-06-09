@@ -23,6 +23,7 @@ export class ProjectUsersService {
                 },
             }
         });
+        if (!creator || creator.delete_at) throw new UnauthorizedException();
         if (!creator.is_creator) throw new UnauthorizedException('You are not project creator');
 
         const user = await this.prisma.user.findUnique({ where: { email } });
@@ -37,12 +38,18 @@ export class ProjectUsersService {
                 },
             }
         });
-        if (projectUser) throw new BadRequestException('User already exists');
+        if (projectUser && !projectUser.delete_at) throw new BadRequestException('User already exists');
+
+        if (projectUser && projectUser.delete_at)
+            return await this.prisma.projectUser.update({
+                data: { delete_at: null },
+                where: { id: projectUser.id }
+            });
 
         return await this.prisma.projectUser.create({
             data: {
                 user_id: user.id,
-                project_id
+                project_id,
             },
         });
     }
@@ -61,12 +68,13 @@ export class ProjectUsersService {
                 },
             }
         });
-        if (!user) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new UnauthorizedException();
 
         const users = await this.prisma.projectUser.findMany({
             select: {
                 id: true,
                 is_creator: true,
+                delete_at: true,
                 user: {
                     select: {
                         id: true,
@@ -78,7 +86,10 @@ export class ProjectUsersService {
             where: { project_id },
         })
 
-        return users;
+        return {
+            creator: user.is_creator,
+            list: users,
+        };
     }
 
     async deleteUserFromProject(req: Request, project_id: number, id: number) {
@@ -95,13 +106,22 @@ export class ProjectUsersService {
                 },
             }
         });
-        if (!creator || !creator.is_creator) throw new UnauthorizedException('You are not project creator');
-        if (creator.id === id) throw new BadRequestException('Can not delete project creator');
+        if (!creator || creator.delete_at) throw new UnauthorizedException();
+        if (!creator.is_creator)
+            throw new UnauthorizedException('You are not project creator');
+        if (creator.id === id)
+            throw new BadRequestException('Can not delete project creator');
 
         const projectUser = await this.prisma.projectUser.findUnique({ where: { id } });
-        if (!projectUser) throw new BadRequestException('User not found');
+        if (!projectUser || projectUser.delete_at)
+            throw new BadRequestException('User not found');
 
-        await this.prisma.projectUser.delete({ where: { id } });
+        await this.prisma.projectUser.update({
+            data: {
+                delete_at: new Date()
+            },
+            where: { id }
+        });
 
         return { message: 'Delete user from project successfully' };
     }

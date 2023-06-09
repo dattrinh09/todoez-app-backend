@@ -31,7 +31,14 @@ export class TeamsService {
         const { sub: user_id } = req.user as ReqUser;
         return await this.prisma.team.findMany({
             where: {
-                team_users: { some: { user_id } },
+                team_users: { 
+                    some: {
+                        AND: [
+                            { user_id },
+                            { delete_at: null },
+                        ]
+                    }
+                },
             }
         });
     }
@@ -50,7 +57,7 @@ export class TeamsService {
                 },
             }
         });
-        if (!teamUser) throw new UnauthorizedException();
+        if (!teamUser || teamUser.delete_at) throw new UnauthorizedException();
 
         const userNumber = await this.prisma.teamUser.count({ where: { team_id: id } });
 
@@ -63,7 +70,6 @@ export class TeamsService {
 
     async updateTeam(req: Request, id: number, dto: TeamDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { name } = dto;
 
         const team = await this.prisma.team.findUnique({ where: { id } });
         if (!team) throw new BadRequestException('Team not found');
@@ -76,13 +82,12 @@ export class TeamsService {
                 },
             }
         });
-        if (!teamUser || !teamUser.is_creator) throw new UnauthorizedException();
+        if (!teamUser || teamUser.delete_at) throw new UnauthorizedException();
+        if (!teamUser.is_creator) throw new UnauthorizedException('You are not team creator');
 
         return await this.prisma.team.update({
             where: { id },
-            data: {
-                name
-            },
+            data: { ...dto },
         });
     }
 
@@ -100,7 +105,8 @@ export class TeamsService {
                 },
             }
         });
-        if (!teamUser || !teamUser.is_creator) throw new UnauthorizedException();
+        if (!teamUser || teamUser.delete_at) throw new UnauthorizedException();
+        if (!teamUser.is_creator) throw new UnauthorizedException('You are not team creator');
 
         await this.prisma.team.delete({ where: { id } });
 

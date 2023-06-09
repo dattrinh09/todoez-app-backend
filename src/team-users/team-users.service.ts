@@ -23,6 +23,7 @@ export class TeamUsersService {
                 },
             }
         });
+        if (!creator || creator.delete_at) throw new UnauthorizedException();
         if (!creator.is_creator) throw new UnauthorizedException('You are not team creator');
 
         const user = await this.prisma.user.findUnique({ where: { email } });
@@ -37,7 +38,13 @@ export class TeamUsersService {
                 },
             }
         });
-        if (teamUser) throw new BadRequestException('User already exists');
+        if (teamUser && !teamUser.delete_at) throw new BadRequestException('User already exists');
+
+        if (teamUser && teamUser.delete_at)
+            return await this.prisma.teamUser.update({
+                data: { delete_at: null },
+                where: { id: teamUser.id }
+            })
 
         return await this.prisma.teamUser.create({
             data: {
@@ -61,12 +68,13 @@ export class TeamUsersService {
                 },
             }
         });
-        if (!user) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new UnauthorizedException();
 
-        const users = await this.prisma.teamUser.findMany({
+        return await this.prisma.teamUser.findMany({
             select: {
                 id: true,
                 is_creator: true,
+                delete_at: true,
                 user: {
                     select: {
                         id: true,
@@ -76,9 +84,7 @@ export class TeamUsersService {
                 }
             },
             where: { team_id },
-        })
-
-        return users;
+        });
     }
 
     async deleteUserFromTeam(req: Request, team_id: number, id: number) {
@@ -95,14 +101,20 @@ export class TeamUsersService {
                 },
             }
         });
-        if (!creator || !creator.is_creator) throw new UnauthorizedException('You are not team creator');
+        if (!creator || creator.delete_at) throw new UnauthorizedException();
+        if (!creator.is_creator) throw new UnauthorizedException('You are not team creator');
 
         if (creator.id === id) throw new BadRequestException('Can not delete team creator');
 
         const teamUser = await this.prisma.teamUser.findUnique({ where: { id } });
-        if (!teamUser) throw new BadRequestException('User not found');
+        if (!teamUser || teamUser.delete_at) throw new BadRequestException('User not found');
 
-        await this.prisma.teamUser.delete({ where: { id } });
+        await this.prisma.teamUser.update({
+            data: { 
+                delete_at: new Date(), 
+            },
+            where: { id }
+        });
 
         return { message: 'Delete user from team successfully' };
     }

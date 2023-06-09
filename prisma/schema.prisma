@@ -17,28 +17,26 @@ model User {
   phone_number  String
   hash_password String
   is_verify     Boolean       @default(false)
-  create_time   DateTime      @default(now())
-  update_time   DateTime      @updatedAt()
+  create_at     DateTime      @default(now())
+  update_at     DateTime      @updatedAt()
   team_users    TeamUser[]
   project_users ProjectUser[]
-  report_tasks  Task[]        @relation("report")
-  assign_tasks  Task[]        @relation("assign")
-  comments      Comment[]
 }
 
 model Team {
-  id          Int        @id @default(autoincrement())
-  name        String
-  create_time DateTime   @default(now())
-  team_users  TeamUser[]
+  id         Int        @id @default(autoincrement())
+  name       String
+  create_at  DateTime   @default(now())
+  team_users TeamUser[]
 }
 
 model TeamUser {
-  id         Int     @id @default(autoincrement())
-  is_creator Boolean @default(false)
-  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id         Int       @id @default(autoincrement())
+  is_creator Boolean   @default(false)
+  delete_at  DateTime? @db.Timestamp(0)
+  user       User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   user_id    Int
-  team       Team    @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  team       Team      @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   team_id    Int
 
   @@unique([user_id, team_id])
@@ -47,19 +45,22 @@ model TeamUser {
 model Project {
   id            Int           @id @default(autoincrement())
   name          String
-  description   String
-  create_time   DateTime      @default(now())
+  create_at     DateTime      @default(now())
   project_users ProjectUser[]
   sprints       Sprint[]
 }
 
 model ProjectUser {
-  id         Int     @id @default(autoincrement())
-  is_creator Boolean @default(false)
-  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id    Int
-  project    Project @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  project_id Int
+  id           Int       @id @default(autoincrement())
+  is_creator   Boolean   @default(false)
+  delete_at    DateTime? @db.Timestamp(0)
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id      Int
+  project      Project   @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  project_id   Int
+  report_tasks Task[]    @relation("report")
+  assign_tasks Task[]    @relation("assign")
+  comments     Comment[]
 
   @@unique([user_id, project_id])
 }
@@ -67,37 +68,39 @@ model ProjectUser {
 model Sprint {
   id         Int      @id @default(autoincrement())
   title      String
-  start_time DateTime
-  end_time   DateTime
+  start_at   DateTime
+  end_at     DateTime
   project    Project  @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   project_id Int
   tasks      Task[]
 }
 
 model Task {
-  id          Int       @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   type        String
   content     String
-  status      String    @default("assign")
+  description String
+  status      String      @default("assign")
   priority    String
-  create_time DateTime  @default(now())
-  update_time DateTime  @updatedAt()
-  end_time    DateTime
-  sprint      Sprint    @relation(fields: [sprint_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  create_at   DateTime    @default(now())
+  update_at   DateTime    @updatedAt()
+  end_at      DateTime
+  sprint      Sprint      @relation(fields: [sprint_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   sprint_id   Int
-  reporter    User      @relation("report", fields: [reporter_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  reporter    ProjectUser @relation("report", fields: [reporter_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   reporter_id Int
-  assignee    User      @relation("assign", fields: [assignee_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  assignee    ProjectUser @relation("assign", fields: [assignee_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   assignee_id Int
   comments    Comment[]
 }
 
 model Comment {
-  id          Int      @id @default(autoincrement())
-  content     String
-  create_time DateTime @default(now())
-  task        Task     @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  task_id     Int
-  user        User     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  user_id     Int
+  id        Int         @id @default(autoincrement())
+  content   String
+  create_at DateTime    @default(now())
+  update_at DateTime    @updatedAt()
+  task      Task        @relation(fields: [task_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  task_id   Int
+  user      ProjectUser @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id   Int
 }

@@ -4,10 +4,13 @@ import { ProjectDto } from './dto/projects.dto';
 
 @Controller('projects')
 export class ProjectsController {
-  constructor(private readonly projectsService: ProjectsService) {}
+  constructor(private readonly projectsService: ProjectsService) { }
 
   @Post('')
-  async createTeam(@Req() req, @Body() dto: ProjectDto) {
+  async createTeam(
+    @Req() req,
+    @Body() dto: ProjectDto
+  ) {
     return await this.projectsService.createProject(req, dto);
   }
 
@@ -17,17 +20,37 @@ export class ProjectsController {
   }
 
   @Get('/:id')
-  async getTeamById(@Req() req, @Param() params: { id: string }) {
-    return await this.projectsService.getProjectById(req, parseInt(params.id));
+  async getTeamById(
+    @Req() req,
+    @Param() params: { id: string }
+  ) {
+    return await this.projectsService.getProjectById(
+      req,
+      parseInt(params.id)
+    );
   }
 
   @Put('/:id')
-  async updateTeam(@Req() req, @Param() params: { id: string }, @Body() dto: ProjectDto) {
-    return await this.projectsService.updateProject(req, parseInt(params.id), dto);
+  async updateTeam(
+    @Req() req,
+    @Param() params: { id: string },
+    @Body() dto: ProjectDto
+  ) {
+    return await this.projectsService.updateProject(
+      req,
+      parseInt(params.id),
+      dto
+    );
   }
 
   @Delete('/:id')
-  async deleteTeam(@Req() req, @Param() params: { id: string }) {
-    return await this.projectsService.deleteProject(req, parseInt(params.id));
+  async deleteTeam(
+    @Req() req,
+    @Param() params: { id: string }
+  ) {
+    return await this.projectsService.deleteProject(
+      req,
+      parseInt(params.id)
+    );
   }
 }

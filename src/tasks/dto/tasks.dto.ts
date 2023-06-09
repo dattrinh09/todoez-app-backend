@@ -7,6 +7,10 @@ export class TaskCreateDto {
 
     @IsNotEmpty()
     @IsString()
+    public description: string;
+
+    @IsNotEmpty()
+    @IsString()
     public type: string;
 
     @IsNotEmpty()
@@ -15,7 +19,7 @@ export class TaskCreateDto {
 
     @IsNotEmpty()
     @IsString()
-    public end_time: string;
+    public end_at: string;
 
     @IsNotEmpty()
     @IsNumber()
@@ -34,6 +38,10 @@ export class TaskUpdateDto {
 
     @IsNotEmpty()
     @IsString()
+    public description: string;
+
+    @IsNotEmpty()
+    @IsString()
     public type: string;
 
     @IsNotEmpty()
@@ -46,7 +54,7 @@ export class TaskUpdateDto {
 
     @IsNotEmpty()
     @IsString()
-    public end_time: string;
+    public end_at: string;
 
     @IsNotEmpty()
     @IsNumber()

@@ -7,9 +7,16 @@ export class SprintDto {
 
     @IsNotEmpty()
     @IsString()
-    public start_time: string;
+    public start_at: string;
 
     @IsNotEmpty()
     @IsString()
-    public end_time: string;
+    public end_at: string;
 }
+
+export class SprintUpdateDto {
+    @IsNotEmpty()
+    @IsString()
+    public title: string;
+}
+

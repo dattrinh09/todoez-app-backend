@@ -4,7 +4,4 @@ export class ProjectDto {
     @IsNotEmpty()
     @IsString()
     public name: string;
-
-    @IsString()
-    public description: string;
 }
