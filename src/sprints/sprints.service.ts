@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 import { ReqUser } from 'src/types/ReqUser';
-import { SprintDto } from './dto/sprints.dto';
+import { SprintDto, SprintUpdateDto } from './dto/sprints.dto';
 
 @Injectable()
 export class SprintsService {
@@ -10,7 +10,7 @@ export class SprintsService {
 
     async createSprint(req: Request, project_id: number, dto: SprintDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { title, start_time, end_time } = dto;
+        const { title, start_at, end_at } = dto;
 
         const project = await this.prisma.project.findUnique({ where: { id: project_id } });
         if (!project) throw new BadRequestException('Project not found');
@@ -23,13 +23,13 @@ export class SprintsService {
                 }
             }
         })
-        if (!user) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new UnauthorizedException();
 
         return await this.prisma.sprint.create({
             data: {
                 title,
-                start_time: new Date(start_time),
-                end_time: new Date(end_time),
+                start_at: new Date(start_at),
+                end_at: new Date(end_at),
                 project_id
             }
         });
@@ -49,18 +49,71 @@ export class SprintsService {
                 }
             }
         })
-        if (!user) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new UnauthorizedException();
+
+        return await this.prisma.sprint.findMany({ where: { project_id } });
+    }
+
+
+    async getSprintsWithTasks(req: Request, project_id: number) {
+        const { sub: user_id } = req.user as ReqUser;
+
+        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
+        if (!project) throw new BadRequestException('Project not found');
+
+        const user = await this.prisma.projectUser.findUnique({
+            where: {
+                user_id_project_id: {
+                    user_id,
+                    project_id,
+                }
+            }
+        })
+        if (!user || user.delete_at) throw new UnauthorizedException();
 
         return await this.prisma.sprint.findMany({
-            where: {
-                project_id
-            }
+            select: {
+                id: true,
+                title: true,
+                start_at: true,
+                end_at: true,
+                tasks: {
+                    select: {
+                        id: true,
+                        content: true,
+                        type: true,
+                        status: true,
+                        priority: true,
+                        reporter: {
+                            select: {
+                                id: true,
+                                user: {
+                                    select: {
+                                        fullname: true,
+                                    }
+                                }
+                            }
+                        },
+                        assignee: {
+                            select: {
+                                id: true,
+                                user: {
+                                    select: {
+                                        fullname: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { id: 'asc' },
+            where: { project_id },
         });
     }
 
-    async updateSprint(req: Request, project_id: number, id: number, dto: SprintDto) {
+    async updateSprint(req: Request, project_id: number, id: number, dto: SprintUpdateDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { title, start_time, end_time } = dto;
 
         const project = await this.prisma.project.findUnique({ where: { id: project_id } });
         if (!project) throw new BadRequestException('Project not found');
@@ -77,15 +130,11 @@ export class SprintsService {
             }
         })
 
-        if (!user) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new UnauthorizedException();
 
         return await this.prisma.sprint.update({
             where: { id },
-            data: {
-                title,
-                start_time: new Date(start_time),
-                end_time: new Date(end_time),
-            }
+            data: { ...dto },
         })
     }
 
@@ -106,9 +155,10 @@ export class SprintsService {
                 }
             }
         })
-        if (!user) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new UnauthorizedException();
 
         await this.prisma.sprint.delete({ where: { id } });
+
         return { message: 'Delete sprint successfully' };
     }
 }

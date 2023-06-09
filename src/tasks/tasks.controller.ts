@@ -12,7 +12,11 @@ export class TasksController {
     @Param() params: { project_id: string },
     @Body() dto: TaskCreateDto
   ) {
-    return await this.tasksService.createTask(req, parseInt(params.project_id), dto);
+    return await this.tasksService.createTask(
+      req,
+      parseInt(params.project_id),
+      dto
+    );
   }
 
   @Get('/:project_id')

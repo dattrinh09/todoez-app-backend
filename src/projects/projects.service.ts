@@ -10,13 +10,9 @@ export class ProjectsService {
 
     async createProject(req: Request, dto: ProjectDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { name, description } = dto;
 
         const newProject = await this.prisma.project.create({
-            data: {
-                name,
-                description,
-            }
+            data: { ...dto },
         });
 
         await this.prisma.projectUser.create({
@@ -27,7 +23,7 @@ export class ProjectsService {
             }
         })
 
-        return { newProject };
+        return newProject;
     }
 
     async getProjects(req: Request) {
@@ -35,7 +31,12 @@ export class ProjectsService {
         return await this.prisma.project.findMany({
             where: {
                 project_users: {
-                    some: { user_id }
+                    some: {
+                        AND: [
+                            { user_id },
+                            { delete_at: null },
+                        ]
+                    }
                 }
             }
         });
@@ -55,22 +56,16 @@ export class ProjectsService {
                 }
             }
         });
-        if (!projectUser) throw new UnauthorizedException();
-
-        const userNumber = await this.prisma.projectUser.count({ where: { project_id: id } });
-        const sprintNumber = await this.prisma.sprint.count({ where: { project_id: id } });
+        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
 
         return {
-            is_creator: projectUser.is_creator,
-            user_number: userNumber,
-            sprint_number: sprintNumber,
-            project,
+            creator: projectUser.is_creator,
+            information: project,
         }
     }
 
     async updateProject(req: Request, id: number, dto: ProjectDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { name, description } = dto;
 
         const project = await this.prisma.project.findUnique({ where: { id } });
         if (!project) throw new BadRequestException('Project not found');
@@ -83,14 +78,12 @@ export class ProjectsService {
                 },
             },
         });
-        if (!projectUser || !projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
+        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
+        if (!projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
 
         return await this.prisma.project.update({
             where: { id },
-            data: {
-                name,
-                description,
-            },
+            data: { ...dto },
         });
     }
 
@@ -108,7 +101,8 @@ export class ProjectsService {
                 }
             }
         });
-        if (!projectUser || !projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
+        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
+        if (!projectUser.is_creator) throw new UnauthorizedException('You are not project creator');
 
         await this.prisma.project.delete({ where: { id } });
 
