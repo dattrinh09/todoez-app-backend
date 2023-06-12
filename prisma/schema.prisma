@@ -16,6 +16,7 @@ model User {
   email         String        @unique
   phone_number  String
   hash_password String
+  hash_rtoken   String?
   is_verify     Boolean       @default(false)
   create_at     DateTime      @default(now())
   update_at     DateTime      @updatedAt()

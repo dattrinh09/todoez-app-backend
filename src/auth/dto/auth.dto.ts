@@ -39,3 +39,9 @@ export class ResetPasswordDto {
     @IsString()
     public password: string;
 }
+
+export class RefreshTokenDto {
+    @IsNotEmpty()
+    @IsString()
+    public refreshToken: string;
+}

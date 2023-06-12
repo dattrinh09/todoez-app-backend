@@ -5,6 +5,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "phone_number" TEXT NOT NULL,
     "hash_password" TEXT NOT NULL,
+    "hash_rtoken" TEXT,
     "is_verify" BOOLEAN NOT NULL DEFAULT false,
     "create_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_at" TIMESTAMP(3) NOT NULL,

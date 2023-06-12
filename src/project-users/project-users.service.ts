@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 import { ReqUser } from 'src/types/ReqUser';
@@ -23,8 +23,8 @@ export class ProjectUsersService {
                 },
             }
         });
-        if (!creator || creator.delete_at) throw new UnauthorizedException();
-        if (!creator.is_creator) throw new UnauthorizedException('You are not project creator');
+        if (!creator || creator.delete_at) throw new BadRequestException('No permission');
+        if (!creator.is_creator) throw new BadRequestException('You are not project creator');
 
         const user = await this.prisma.user.findUnique({ where: { email } });
         if (!user) throw new BadRequestException('User not found');
@@ -68,7 +68,7 @@ export class ProjectUsersService {
                 },
             }
         });
-        if (!user || user.delete_at) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new BadRequestException('No permission');
 
         const users = await this.prisma.projectUser.findMany({
             select: {
@@ -106,9 +106,9 @@ export class ProjectUsersService {
                 },
             }
         });
-        if (!creator || creator.delete_at) throw new UnauthorizedException();
+        if (!creator || creator.delete_at) throw new BadRequestException('No permission');
         if (!creator.is_creator)
-            throw new UnauthorizedException('You are not project creator');
+            throw new BadRequestException('You are not project creator');
         if (creator.id === id)
             throw new BadRequestException('Can not delete project creator');
 
