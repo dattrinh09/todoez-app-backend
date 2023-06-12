@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Request } from 'express';
 import { ReqUser } from 'src/types/ReqUser';
@@ -23,7 +23,7 @@ export class SprintsService {
                 }
             }
         })
-        if (!user || user.delete_at) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new BadRequestException('No permission');
 
         return await this.prisma.sprint.create({
             data: {
@@ -49,7 +49,7 @@ export class SprintsService {
                 }
             }
         })
-        if (!user || user.delete_at) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new BadRequestException('No permission');
 
         return await this.prisma.sprint.findMany({ where: { project_id } });
     }
@@ -69,7 +69,7 @@ export class SprintsService {
                 }
             }
         })
-        if (!user || user.delete_at) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new BadRequestException('No permission');
 
         return await this.prisma.sprint.findMany({
             select: {
@@ -130,7 +130,7 @@ export class SprintsService {
             }
         })
 
-        if (!user || user.delete_at) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new BadRequestException('No permission');
 
         return await this.prisma.sprint.update({
             where: { id },
@@ -155,7 +155,7 @@ export class SprintsService {
                 }
             }
         })
-        if (!user || user.delete_at) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new BadRequestException('No permission');
 
         await this.prisma.sprint.delete({ where: { id } });
 

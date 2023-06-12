@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TaskCreateDto, TaskUpdateDto } from './dto/tasks.dto';
@@ -25,12 +25,12 @@ export class TasksService {
                 }
             }
         });
-        if (!reporter || reporter.delete_at) throw new UnauthorizedException();
+        if (!reporter || reporter.delete_at) throw new BadRequestException('No permission');
 
         const sprint = await this.prisma.sprint.findUnique({
             where: { id: sprint_id }
         });
-        if (!sprint) throw new BadRequestException('sprint not found');
+        if (!sprint) throw new BadRequestException('Sprint not found');
 
         const assignee = await this.prisma.projectUser.findUnique({
             where: { id: assignee_id }
@@ -73,7 +73,7 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
 
         const total = await this.prisma.task.count({
             where: {
@@ -183,7 +183,7 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
 
         return await this.prisma.task.findUnique({
             select: {
@@ -246,7 +246,7 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
 
         const sprint = await this.prisma.sprint.findUnique({
             where: { id: sprint_id }
@@ -289,7 +289,7 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser || projectUser.delete_at) throw new UnauthorizedException();
+        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
 
         const task = await this.prisma.task.findUnique({ where: { id } });
         if (!task) throw new BadRequestException('Task not found');

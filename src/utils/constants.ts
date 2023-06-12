@@ -3,6 +3,11 @@ export const jwtConstants = {
     expires: process.env.JWT_EXPIRES,
 };
 
+export const rtConstants = {
+    secret: process.env.RT_SECRET,
+    expires: process.env.RT_EXPIRES,
+};
+
 export const mailerConstants = {
     host: process.env.MAIL_HOST,
     user: process.env.MAIL_USER,

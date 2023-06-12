@@ -1,6 +1,6 @@
 export type ReqUser = {
-    username: string,
     sub: number,
+    email: string,
     iat: number,
     exp: number,
 };

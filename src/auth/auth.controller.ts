@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GoogleSigninDto, ResetPasswordDto, SigninDto, SignupDto } from './dto/auth.dto';
+import { GoogleSigninDto, RefreshTokenDto, ResetPasswordDto, SigninDto, SignupDto } from './dto/auth.dto';
 import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
@@ -43,8 +43,14 @@ export class AuthController {
     return await this.authService.resetPassword(params.email, dto);
   }
 
+  @Public()
+  @Post('/refresh')
+  async refreshToken(@Body() dto: RefreshTokenDto) {
+    return await this.authService.refreshToken(dto);
+  }
+
   @Get('/signout')
-  async signout() {
-    return await this.authService.signout();
+  async signout(@Req() req) {
+    return await this.authService.signout(req);
   }
 }
