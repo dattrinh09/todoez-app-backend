@@ -55,7 +55,7 @@ export class SprintsService {
     }
 
 
-    async getSprintsWithTasks(req: Request, project_id: number) {
+    async getSprintsWithTasks(req: Request, project_id: number, page: number, limit: number) {
         const { sub: user_id } = req.user as ReqUser;
 
         const project = await this.prisma.project.findUnique({ where: { id: project_id } });
@@ -71,7 +71,9 @@ export class SprintsService {
         })
         if (!user || user.delete_at) throw new BadRequestException('No permission');
 
-        return await this.prisma.sprint.findMany({
+        const total = await this.prisma.sprint.count({ where: { project_id } });
+
+        const sprints = await this.prisma.sprint.findMany({
             select: {
                 id: true,
                 title: true,
@@ -107,9 +109,16 @@ export class SprintsService {
                     }
                 }
             },
-            orderBy: { id: 'asc' },
             where: { project_id },
+            skip: (page - 1) * limit,
+            take: limit,
+            orderBy: { id: 'desc' },
         });
+
+        return {
+            total,
+            list: sprints,
+        }
     }
 
     async updateSprint(req: Request, project_id: number, id: number, dto: SprintUpdateDto) {

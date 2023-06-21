@@ -174,7 +174,7 @@ export class AuthService {
         const rToken = await this.signRefreshToken(user.id, user.email);
         const hash_rtoken = await this.hashData(rToken);
 
-        if (!token || !rToken || hash_rtoken) throw new BadRequestException('Wrong credentials');
+        if (!token || !rToken || !hash_rtoken) throw new BadRequestException('Wrong credentials');
 
         await this.prisma.user.update({
             data: { hash_rtoken },
