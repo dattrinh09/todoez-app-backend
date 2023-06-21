@@ -23,7 +23,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
         const request = context.switchToHttp().getRequest();
         const token = this.extractTokenFromHeader(request);
-        if (!token) throw new UnauthorizedException();
+        if (!token) throw new UnauthorizedException('No access token');
         try {
             const payload = await this.jwtService.verifyAsync(
                 token,
@@ -32,8 +32,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                 }
             );
             request['user'] = payload;
-        } catch {
-            throw new UnauthorizedException();
+        } catch (error) {
+            throw new UnauthorizedException(error.message);
         }
         return true;
     }
