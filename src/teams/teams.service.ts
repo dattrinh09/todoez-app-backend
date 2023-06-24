@@ -59,12 +59,9 @@ export class TeamsService {
         });
         if (!teamUser || teamUser.delete_at) throw new UnauthorizedException();
 
-        const userNumber = await this.prisma.teamUser.count({ where: { team_id: id } });
-
         return {
-            is_creator: teamUser.is_creator,
-            user_number: userNumber,
-            team,
+            creator: teamUser.is_creator,
+            information: team,
         };
     }
 

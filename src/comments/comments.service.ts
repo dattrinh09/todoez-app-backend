@@ -89,7 +89,7 @@ export class CommentsService {
         if (!user || user.delete_at) throw new BadRequestException('No permission');
 
         const comment = await this.prisma.comment.findUnique({ where: { id } });
-        if (comment.user_id !== user.id) throw new BadRequestException('No permission');
+        if (!comment || comment.user_id !== user.id) throw new BadRequestException('No permission');
 
         return await this.prisma.comment.update({
             data: { ...dto },

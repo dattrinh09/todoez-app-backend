@@ -81,7 +81,7 @@ export class AuthService {
     async forgotPassword(email: string) {
         const foundUser = await this.prisma.user.findUnique({ where: { email } });
         if (!foundUser) throw new BadRequestException('Email does not exists');
-        if (!foundUser.hash_password) throw new BadRequestException('This email use for google signin function');
+        if (!foundUser.hash_password) throw new BadRequestException('This email use for google signin');
         if (!foundUser.is_verify) throw new BadRequestException('Account is not verify');
 
         const token = await this.signToken(foundUser.id, foundUser.email);
@@ -232,15 +232,13 @@ export class AuthService {
         }
     }
 
-    async createGoogleUser(email: string, name: string) {
+    async createGoogleUser(email: string, fullname: string) {
         const user = await this.prisma.user.findUnique({ where: { email } });
         if (user) return user;
         return await this.prisma.user.create({
             data: {
-                email: email,
-                fullname: name,
-                phone_number: "",
-                hash_password: "",
+                email,
+                fullname,
                 is_verify: true,
             },
         });
