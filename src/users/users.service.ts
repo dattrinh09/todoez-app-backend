@@ -49,17 +49,13 @@ export class UsersService {
 
     async updateProfile(req: Request, dto: UpdateProfileDto) {
         const { sub: id } = req.user as ReqUser;
-        const { fullname, phone_number } = dto;
 
         const user = await this.prisma.user.findUnique({ where: { id } });
         if (!user) throw new BadRequestException('User not found');
 
         const updatedUser = await this.prisma.user.update({
             where: { id },
-            data: {
-                fullname,
-                phone_number
-            }
+            data: { ...dto },
         });
 
         const is_email_signin = !!updatedUser.hash_password;

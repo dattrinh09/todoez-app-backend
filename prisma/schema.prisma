@@ -14,9 +14,10 @@ model User {
   id            Int           @id @default(autoincrement())
   fullname      String
   email         String        @unique
-  phone_number  String
-  hash_password String
+  phone_number  String?
+  hash_password String?
   hash_rtoken   String?
+  avatar        String?
   is_verify     Boolean       @default(false)
   create_at     DateTime      @default(now())
   update_at     DateTime      @updatedAt()
@@ -39,8 +40,19 @@ model TeamUser {
   user_id    Int
   team       Team      @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
   team_id    Int
+  notes      Note[]
 
   @@unique([user_id, team_id])
+}
+
+model Note {
+  id          Int      @id @default(autoincrement())
+  content     String
+  description String
+  create_at   DateTime @default(now())
+  update_at   DateTime @updatedAt()
+  user        TeamUser @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user_id     Int
 }
 
 model Project {

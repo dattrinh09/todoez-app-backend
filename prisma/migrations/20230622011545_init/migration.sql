@@ -3,9 +3,10 @@ CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "fullname" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "phone_number" TEXT NOT NULL,
-    "hash_password" TEXT NOT NULL,
+    "phone_number" TEXT,
+    "hash_password" TEXT,
     "hash_rtoken" TEXT,
+    "avatar" TEXT,
     "is_verify" BOOLEAN NOT NULL DEFAULT false,
     "create_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "update_at" TIMESTAMP(3) NOT NULL,
@@ -31,6 +32,18 @@ CREATE TABLE "TeamUser" (
     "team_id" INTEGER NOT NULL,
 
     CONSTRAINT "TeamUser_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Note" (
+    "id" SERIAL NOT NULL,
+    "content" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "create_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "update_at" TIMESTAMP(3) NOT NULL,
+    "user_id" INTEGER NOT NULL,
+
+    CONSTRAINT "Note_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -108,6 +121,9 @@ ALTER TABLE "TeamUser" ADD CONSTRAINT "TeamUser_user_id_fkey" FOREIGN KEY ("user
 
 -- AddForeignKey
 ALTER TABLE "TeamUser" ADD CONSTRAINT "TeamUser_team_id_fkey" FOREIGN KEY ("team_id") REFERENCES "Team"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Note" ADD CONSTRAINT "Note_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "TeamUser"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "ProjectUser" ADD CONSTRAINT "ProjectUser_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

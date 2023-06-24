@@ -23,8 +23,8 @@ export class TeamUsersService {
                 },
             }
         });
-        if (!creator || creator.delete_at) throw new UnauthorizedException();
-        if (!creator.is_creator) throw new UnauthorizedException('You are not team creator');
+        if (!creator || creator.delete_at) throw new BadRequestException('No permission');
+        if (!creator.is_creator) throw new BadRequestException('You are not project creator');
 
         const user = await this.prisma.user.findUnique({ where: { email } });
         if (!user) throw new BadRequestException('User not found');
@@ -68,9 +68,9 @@ export class TeamUsersService {
                 },
             }
         });
-        if (!user || user.delete_at) throw new UnauthorizedException();
+        if (!user || user.delete_at) throw new BadRequestException('No permission');
 
-        return await this.prisma.teamUser.findMany({
+        const users = await this.prisma.teamUser.findMany({
             select: {
                 id: true,
                 is_creator: true,
@@ -85,6 +85,11 @@ export class TeamUsersService {
             },
             where: { team_id },
         });
+
+        return {
+            creator: user.is_creator,
+            list: users,
+        }
     }
 
     async deleteUserFromTeam(req: Request, team_id: number, id: number) {
@@ -101,8 +106,8 @@ export class TeamUsersService {
                 },
             }
         });
-        if (!creator || creator.delete_at) throw new UnauthorizedException();
-        if (!creator.is_creator) throw new UnauthorizedException('You are not team creator');
+        if (!creator || creator.delete_at) throw new BadRequestException('No permission');
+        if (!creator.is_creator) throw new BadRequestException('You are not project creator');
 
         if (creator.id === id) throw new BadRequestException('Can not delete team creator');
 
@@ -110,8 +115,8 @@ export class TeamUsersService {
         if (!teamUser || teamUser.delete_at) throw new BadRequestException('User not found');
 
         await this.prisma.teamUser.update({
-            data: { 
-                delete_at: new Date(), 
+            data: {
+                delete_at: new Date(),
             },
             where: { id }
         });
