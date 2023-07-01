@@ -80,6 +80,7 @@ export class TeamUsersService {
                         id: true,
                         fullname: true,
                         email: true,
+                        avatar: true,
                     }
                 }
             },

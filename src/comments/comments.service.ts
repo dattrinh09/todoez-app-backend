@@ -58,6 +58,7 @@ export class CommentsService {
                         user: {
                             select: {
                                 fullname: true,
+                                avatar: true,
                             }
                         }
                     }

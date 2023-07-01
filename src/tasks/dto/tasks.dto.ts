@@ -32,39 +32,35 @@ export class TaskCreateDto {
 
 
 export class TaskUpdateDto {
-    @IsNotEmpty()
     @IsString()
     public content: string;
 
-    @IsNotEmpty()
     @IsString()
     public description: string;
 
-    @IsNotEmpty()
     @IsString()
     public type: string;
 
-    @IsNotEmpty()
     @IsString()
     public status: string;
 
-    @IsNotEmpty()
     @IsString()
     public priority: string;
 
-    @IsNotEmpty()
     @IsString()
     public end_at: string;
 
-    @IsNotEmpty()
     @IsNumber()
     public sprint_id: number;
 
-    @IsNotEmpty()
     @IsNumber()
     public assignee_id: number;
 
-    @IsNotEmpty()
     @IsNumber()
     public reporter_id: number;
+}
+
+export class UpdateTaskStatus {
+    @IsString()
+    public status: string
 }

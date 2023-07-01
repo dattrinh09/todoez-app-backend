@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { TaskCreateDto, TaskUpdateDto } from './dto/tasks.dto';
+import { TaskCreateDto, TaskUpdateDto, UpdateTaskStatus } from './dto/tasks.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -16,6 +16,27 @@ export class TasksController {
       req,
       parseInt(params.project_id),
       dto
+    );
+  }
+
+  @Get('/my-task')
+  async getMyTasks(
+    @Req() req,
+    @Query('type') type: string,
+    @Query('status') status: string,
+    @Query('priority') priority: string,
+    @Query('keyword') keyword: string,
+    @Query('page') page: string,
+    @Query('limit') limit: string
+  ) {
+    return await this.tasksService.getMyTasks(
+      req,
+      type,
+      status,
+      priority,
+      keyword,
+      parseInt(page),
+      parseInt(limit)
     );
   }
 
@@ -55,6 +76,20 @@ export class TasksController {
       req,
       parseInt(params.project_id),
       parseInt(params.id)
+    );
+  }
+
+  @Put('/:project_id/:id/update-status')
+  async updateTaskStatus(
+    @Req() req,
+    @Param() params: { project_id: string, id: string },
+    @Body() dto: UpdateTaskStatus
+  ) {
+    return await this.tasksService.updateTaskStatus(
+      req,
+      parseInt(params.project_id),
+      parseInt(params.id),
+      dto
     );
   }
 
