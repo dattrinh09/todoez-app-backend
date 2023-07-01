@@ -30,8 +30,18 @@ export class TeamsService {
     async getTeams(req: Request) {
         const { sub: user_id } = req.user as ReqUser;
         return await this.prisma.team.findMany({
+            select: {
+                id: true,
+                name: true,
+                create_at: true,
+                team_users: {
+                    select: {
+                        notes: true,
+                    }
+                }
+            },
             where: {
-                team_users: { 
+                team_users: {
                     some: {
                         AND: [
                             { user_id },
@@ -39,7 +49,8 @@ export class TeamsService {
                         ]
                     }
                 },
-            }
+            },
+            orderBy: { id: 'desc' },
         });
     }
 

@@ -65,7 +65,7 @@ export class NotesService {
                         user: {
                             select: {
                                 fullname: true,
-                                email: true,
+                                avatar: true,
                             }
                         }
                     }

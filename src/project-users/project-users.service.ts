@@ -12,9 +12,6 @@ export class ProjectUsersService {
         const { sub: user_id } = req.user as ReqUser;
         const { email } = dto;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
-
         const creator = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -57,9 +54,6 @@ export class ProjectUsersService {
     async getUsersInProject(req: Request, project_id: number) {
         const { sub: user_id } = req.user as ReqUser;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
-
         const user = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -80,6 +74,7 @@ export class ProjectUsersService {
                         id: true,
                         fullname: true,
                         email: true,
+                        avatar: true,
                     }
                 }
             },
@@ -94,9 +89,6 @@ export class ProjectUsersService {
 
     async deleteUserFromProject(req: Request, project_id: number, id: number) {
         const { sub: user_id } = req.user as ReqUser;
-
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
 
         const creator = await this.prisma.projectUser.findUnique({
             where: {

@@ -12,9 +12,6 @@ export class SprintsService {
         const { sub: user_id } = req.user as ReqUser;
         const { title, start_at, end_at } = dto;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
-
         const user = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -38,9 +35,6 @@ export class SprintsService {
     async getSprints(req: Request, project_id: number) {
         const { sub: user_id } = req.user as ReqUser;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
-
         const user = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -57,9 +51,6 @@ export class SprintsService {
 
     async getSprintsWithTasks(req: Request, project_id: number, page: number, limit: number) {
         const { sub: user_id } = req.user as ReqUser;
-
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
 
         const user = await this.prisma.projectUser.findUnique({
             where: {
@@ -86,9 +77,11 @@ export class SprintsService {
                         type: true,
                         status: true,
                         priority: true,
+                        end_at: true,
                         reporter: {
                             select: {
                                 id: true,
+                                delete_at: true,
                                 user: {
                                     select: {
                                         fullname: true,
@@ -99,6 +92,7 @@ export class SprintsService {
                         assignee: {
                             select: {
                                 id: true,
+                                delete_at: true,
                                 user: {
                                     select: {
                                         fullname: true,
@@ -124,9 +118,6 @@ export class SprintsService {
     async updateSprint(req: Request, project_id: number, id: number, dto: SprintUpdateDto) {
         const { sub: user_id } = req.user as ReqUser;
 
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
-
         const sprint = await this.prisma.sprint.findUnique({ where: { id } });
         if (!sprint) throw new BadRequestException('Sprint not found');
 
@@ -149,9 +140,6 @@ export class SprintsService {
 
     async deleteSprint(req: Request, project_id: number, id: number) {
         const { sub: user_id } = req.user as ReqUser;
-
-        const project = await this.prisma.project.findUnique({ where: { id: project_id } });
-        if (!project) throw new BadRequestException('Project not found');
 
         const sprint = await this.prisma.sprint.findUnique({ where: { id } });
         if (!sprint) throw new BadRequestException('Sprint not found');

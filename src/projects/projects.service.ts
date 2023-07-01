@@ -29,6 +29,17 @@ export class ProjectsService {
     async getProjects(req: Request) {
         const { sub: user_id } = req.user as ReqUser;
         return await this.prisma.project.findMany({
+            select: {
+                id: true,
+                name: true,
+                create_at: true,
+                project_users: true,
+                sprints: {
+                    select: {
+                        tasks: true,
+                    }
+                },
+            },
             where: {
                 project_users: {
                     some: {
@@ -38,7 +49,8 @@ export class ProjectsService {
                         ]
                     }
                 }
-            }
+            },
+            orderBy: { id: 'desc' },
         });
     }
 
@@ -67,9 +79,6 @@ export class ProjectsService {
     async updateProject(req: Request, id: number, dto: ProjectDto) {
         const { sub: user_id } = req.user as ReqUser;
 
-        const project = await this.prisma.project.findUnique({ where: { id } });
-        if (!project) throw new BadRequestException('Project not found');
-
         const projectUser = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -89,9 +98,6 @@ export class ProjectsService {
 
     async deleteProject(req: Request, id: number) {
         const { sub: user_id } = req.user as ReqUser;
-
-        const project = await this.prisma.project.findUnique({ where: { id } });
-        if (!project) throw new BadRequestException('Project not found');
 
         const projectUser = await this.prisma.projectUser.findUnique({
             where: {

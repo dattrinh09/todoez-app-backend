@@ -17,3 +17,8 @@ export class UpdateProfileDto {
     @IsString()
     public phone_number: string;
 }
+
+export class ChangeAvatar {
+    @IsString()
+    public avatar: string;
+}

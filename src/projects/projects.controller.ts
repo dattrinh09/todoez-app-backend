@@ -7,7 +7,7 @@ export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) { }
 
   @Post('')
-  async createTeam(
+  async createProject(
     @Req() req,
     @Body() dto: ProjectDto
   ) {
@@ -15,12 +15,12 @@ export class ProjectsController {
   }
 
   @Get('')
-  async getTeams(@Req() req) {
+  async getProjects(@Req() req) {
     return await this.projectsService.getProjects(req)
   }
 
   @Get('/:id')
-  async getTeamById(
+  async getProjectById(
     @Req() req,
     @Param() params: { id: string }
   ) {
@@ -31,7 +31,7 @@ export class ProjectsController {
   }
 
   @Put('/:id')
-  async updateTeam(
+  async updateProject(
     @Req() req,
     @Param() params: { id: string },
     @Body() dto: ProjectDto
@@ -44,7 +44,7 @@ export class ProjectsController {
   }
 
   @Delete('/:id')
-  async deleteTeam(
+  async deleteProject(
     @Req() req,
     @Param() params: { id: string }
   ) {
