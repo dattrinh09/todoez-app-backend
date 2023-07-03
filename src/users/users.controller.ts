@@ -30,4 +30,9 @@ export class UsersController {
   async changeAvatar(@Req() req, @Body() dto: ChangeAvatar) {
     return await this.usersService.changeAvatar(req, dto);
   }
+
+  @Put('/delete-avatar')
+  async deleteAvatar(@Req() req) {
+    return await this.usersService.deleteAvatar(req);
+  }
 }
