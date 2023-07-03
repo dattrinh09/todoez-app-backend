@@ -125,6 +125,30 @@ export class UsersService {
         };
     }
 
+    async deleteAvatar(req: Request) {
+        const { sub: id } = req.user as ReqUser;
+
+        const user = await this.prisma.user.findUnique({ where: { id } });
+        if (!user) throw new BadRequestException('User not found');
+
+        const updatedUser = await this.prisma.user.update({
+            where: { id },
+            data: {
+                avatar: null,
+            }
+        });
+
+        const is_email_signin = !!updatedUser.hash_password;
+        delete updatedUser.hash_password;
+
+        return {
+            user_info: {
+                ...updatedUser,
+                is_email_signin,
+            }
+        };
+    }
+
     async hashPassword(password: string) {
         const saltOrRounds = 10;
         return await bcrypt.hash(password, saltOrRounds);
