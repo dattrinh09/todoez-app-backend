@@ -1,3 +1,5 @@
+export const clientUrl = process.env.CLIENT_URL;
+
 export const jwtConstants = {
     secret: process.env.JWT_SECRET,
     expires: process.env.JWT_EXPIRES,

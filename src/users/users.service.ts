@@ -60,6 +60,11 @@ export class UsersService {
         };
     }
 
+    async getUserById(id: number) {
+        const user = await this.prisma.user.findUnique({ where: { id } });
+        return user;
+    }
+
     async changePassword(req: Request, dto: ChangePasswordDto) {
         const { sub: id } = req.user as ReqUser;
         const { currentPassword, newPassword } = dto;

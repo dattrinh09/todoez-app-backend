@@ -4,7 +4,7 @@ import { GoogleSigninDto, RefreshTokenDto, ResetPasswordDto, SigninDto, SignupDt
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
-import { googleOauthConstants, jwtConstants, rtConstants } from 'src/utils/constants';
+import { clientUrl, googleOauthConstants, jwtConstants, rtConstants } from 'src/utils/constants';
 import { OAuth2Client } from 'google-auth-library';
 import { Request } from 'express';
 import { ReqUser } from 'src/types/ReqUser';
@@ -43,7 +43,7 @@ export class AuthService {
             template: 'index',
             context: {
                 text: 'Click link below to verify your email',
-                link: `http://localhost:3000/auth/verify-email?email=${createdUser.email}&token=${token}`,
+                link: this.getVerifyUrl("verify-email", createdUser.email, token),
             }
         });
 
@@ -92,7 +92,7 @@ export class AuthService {
             template: 'index',
             context: {
                 text: 'Click link below to reset your password',
-                link: `http://localhost:3000/auth/reset-password?email=${foundUser.email}&token=${token}`,
+                link: this.getVerifyUrl("reset-password", foundUser.email, token),
             }
         });
 
@@ -230,6 +230,11 @@ export class AuthService {
         return {
             access_token: token,
         }
+    }
+
+    getVerifyUrl(type: string, email: string, token: string) {
+        const baseUrl = clientUrl;
+        return `${baseUrl}/${type}?email=${email}&token=${token}`;
     }
 
     async createGoogleUser(email: string, fullname: string) {
