@@ -40,7 +40,7 @@ export class AuthService {
         await this.mailer.sendMail({
             to: createdUser.email,
             subject: 'Welcome to website',
-            template: 'index',
+            template: './index',
             context: {
                 text: 'Click link below to verify your email',
                 link: this.getVerifyUrl("verify-email", createdUser.email, token),
@@ -89,7 +89,7 @@ export class AuthService {
         await this.mailer.sendMail({
             to: foundUser.email,
             subject: 'Forgot password',
-            template: 'index',
+            template: './index',
             context: {
                 text: 'Click link below to reset your password',
                 link: this.getVerifyUrl("reset-password", foundUser.email, token),
