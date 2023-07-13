@@ -5,7 +5,7 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": [
-      { "include": "templates/*.hbs", "outDir": "dist/src" }
+      { "include": "templates/*.hbs", "outDir": "src" }
     ],
     "watchAssets": true
   }

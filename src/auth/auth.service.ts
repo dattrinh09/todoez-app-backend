@@ -234,7 +234,7 @@ export class AuthService {
 
     getVerifyUrl(type: string, email: string, token: string) {
         const baseUrl = clientUrl;
-        return `${baseUrl}/${type}?email=${email}&token=${token}`;
+        return `${baseUrl}/auth/${type}?email=${email}&token=${token}`;
     }
 
     async createGoogleUser(email: string, fullname: string) {
