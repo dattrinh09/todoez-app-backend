@@ -36,15 +36,15 @@ export class AuthService {
         });
 
         const token = await this.signToken(createdUser.id, createdUser.email);
+        if (!token) throw new BadRequestException('Wrong credentials');
+
+        const link = this.getVerifyUrl("verify-email", createdUser.email, token);
 
         await this.mailer.sendMail({
             to: createdUser.email,
             subject: 'Welcome to website',
-            template: 'index',
-            context: {
-                text: 'Click link below to verify your email',
-                link: this.getVerifyUrl("verify-email", createdUser.email, token),
-            }
+            text: 'Click link below to verify your account',
+            html: `<div>Click <a href='${link}'>here</a> to verify your account</div>`,
         });
 
         return { message: 'Signup successfully' };
@@ -85,15 +85,15 @@ export class AuthService {
         if (!foundUser.is_verify) throw new BadRequestException('Account is not verify');
 
         const token = await this.signToken(foundUser.id, foundUser.email);
+        if (!token) throw new BadRequestException('Wrong credentials');
+
+        const link = this.getVerifyUrl("reset-password", foundUser.email, token);
 
         await this.mailer.sendMail({
             to: foundUser.email,
             subject: 'Forgot password',
-            template: 'index',
-            context: {
-                text: 'Click link below to reset your password',
-                link: this.getVerifyUrl("reset-password", foundUser.email, token),
-            }
+            text: 'Click link below to reset your account password',
+            html: `<div>Click <a href='${link}'>here</a> to reset your account password </div>`,
         });
 
         return { mssage: 'Email exists' };

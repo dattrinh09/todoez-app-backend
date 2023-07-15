@@ -4,8 +4,6 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { mailerConstants } from './utils/constants';
-import { join } from 'path';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TeamUsersModule } from './team-users/team-users.module';
 import { TeamsModule } from './teams/teams.module';
 import { ProjectsModule } from './projects/projects.module';
@@ -32,13 +30,6 @@ import { NotesModule } from './notes/notes.module';
         },
         defaults: {
           from: `"TodoEZ" <${mailerConstants.from}>`
-        },
-        template: {
-          dir: join(__dirname, 'src/templates'),
-          adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true
-          },
         },
       }),
     }),
