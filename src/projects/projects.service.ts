@@ -26,9 +26,35 @@ export class ProjectsService {
         return newProject;
     }
 
-    async getProjects(req: Request) {
+    async getProjects(
+        req: Request,
+        keyword: string,
+        page: number,
+        limit: number
+    ) {
         const { sub: user_id } = req.user as ReqUser;
-        return await this.prisma.project.findMany({
+        const total = await this.prisma.project.count({
+            where: {
+                project_users: {
+                    some: {
+                        AND: [
+                            { user_id },
+                            { delete_at: null },
+                        ]
+                    }
+                },
+                AND: [
+                    {
+                        name: {
+                            contains: keyword,
+                            mode: 'insensitive',
+                        }
+                    }
+                ],
+            },
+        });
+
+        const list = await this.prisma.project.findMany({
             select: {
                 id: true,
                 name: true,
@@ -48,10 +74,25 @@ export class ProjectsService {
                             { delete_at: null },
                         ]
                     }
-                }
+                },
+                AND: [
+                    {
+                        name: {
+                            contains: keyword,
+                            mode: 'insensitive',
+                        }
+                    }
+                ],
             },
             orderBy: { id: 'desc' },
+            skip: (page - 1) * limit,
+            take: limit,
         });
+
+        return {
+            total,
+            list,
+        }
     }
 
     async getProjectById(req: Request, id: number) {

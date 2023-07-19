@@ -43,7 +43,6 @@ export class AuthService {
         await this.mailer.sendMail({
             to: createdUser.email,
             subject: 'Welcome to website',
-            text: 'Click link below to verify your account',
             html: `<div>Click <a href='${link}'>here</a> to verify your account</div>`,
         });
 
@@ -92,7 +91,6 @@ export class AuthService {
         await this.mailer.sendMail({
             to: foundUser.email,
             subject: 'Forgot password',
-            text: 'Click link below to reset your account password',
             html: `<div>Click <a href='${link}'>here</a> to reset your account password </div>`,
         });
 

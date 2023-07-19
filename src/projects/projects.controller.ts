@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Req, Param, Body } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Req, Param, Body, Query } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { ProjectDto } from './dto/projects.dto';
 
@@ -15,8 +15,18 @@ export class ProjectsController {
   }
 
   @Get('')
-  async getProjects(@Req() req) {
-    return await this.projectsService.getProjects(req)
+  async getProjects(
+    @Req() req,
+    @Query('keyword') keyword: string,
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+  ) {
+    return await this.projectsService.getProjects(
+      req,
+      keyword,
+      parseInt(page),
+      parseInt(limit)
+    );
   }
 
   @Get('/:id')

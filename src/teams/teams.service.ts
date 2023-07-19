@@ -27,9 +27,34 @@ export class TeamsService {
         return { newTeam };
     }
 
-    async getTeams(req: Request) {
+    async getTeams(
+        req: Request,
+        keyword: string,
+        page: number,
+        limit: number
+    ) {
         const { sub: user_id } = req.user as ReqUser;
-        return await this.prisma.team.findMany({
+        const total = await this.prisma.team.count({
+            where: {
+                team_users: {
+                    some: {
+                        AND: [
+                            { user_id },
+                            { delete_at: null },
+                        ]
+                    }
+                },
+                AND: [
+                    {
+                        name: {
+                            contains: keyword,
+                            mode: 'insensitive',
+                        }
+                    }
+                ],
+            },
+        })
+        const list = await this.prisma.team.findMany({
             select: {
                 id: true,
                 name: true,
@@ -49,9 +74,24 @@ export class TeamsService {
                         ]
                     }
                 },
+                AND: [
+                    {
+                        name: {
+                            contains: keyword,
+                            mode: 'insensitive',
+                        }
+                    }
+                ],
             },
             orderBy: { id: 'desc' },
+            skip: (page - 1) * limit,
+            take: limit,
         });
+
+        return {
+            total,
+            list,
+        }
     }
 
     async getTeamById(req: Request, id: number) {

@@ -23,12 +23,16 @@ export class NotesController {
   async getNotes(
     @Req() req,
     @Param() params: { team_id: string },
+    @Query('keyword') keyword: string,
+    @Query('user') user: string,
     @Query('page') page: string,
     @Query('limit') limit: string
   ) {
     return await this.notesService.getNotes(
       req,
       parseInt(params.team_id),
+      keyword,
+      parseInt(user),
       parseInt(page),
       parseInt(limit)
     );

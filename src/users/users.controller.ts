@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Put, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put, Query, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ChangeAvatar, ChangePasswordDto, UpdateProfileDto } from './dto/users.dto';
 
@@ -7,8 +7,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Get('/all-users')
-  async getAllUsers(@Req() req) {
-    return await this.usersService.getAllUsers(req);
+  async getAllUsers(@Query('keyword') keyword: string) {
+    return await this.usersService.getAllUsers(keyword);
   }
 
   @Get('/profile')

@@ -297,6 +297,7 @@ export class TasksService {
     async updateTaskStatus(req: Request, project_id: number, id: number, dto: UpdateTaskStatus) {
         const { sub: user_id } = req.user as ReqUser;
 
+        const task = await this.prisma.task.findUnique({ where: { id } });
         const projectUser = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -305,7 +306,14 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
+        
+        
+        if (
+            !projectUser
+            || projectUser.delete_at
+            || projectUser.id !== task.assignee_id
+            || projectUser.id !== task.reporter_id
+        ) throw new BadRequestException('No permission');
 
         return await this.prisma.task.update({
             where: { id },
@@ -317,6 +325,8 @@ export class TasksService {
         const { sub: user_id } = req.user as ReqUser;
         const { end_at, sprint_id, assignee_id, reporter_id } = dto;
 
+        const task = await this.prisma.task.findUnique({ where: { id } });
+
         const projectUser = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -325,7 +335,13 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
+
+        if (
+            !projectUser
+            || projectUser.delete_at
+            || projectUser.id !== task.assignee_id
+            || projectUser.id !== task.reporter_id
+        ) throw new BadRequestException('No permission');
 
         const sprint = await this.prisma.sprint.findUnique({
             where: { id: sprint_id }
@@ -355,6 +371,7 @@ export class TasksService {
     async deleteTask(req: Request, project_id: number, id: number) {
         const { sub: user_id } = req.user as ReqUser;
 
+        const task = await this.prisma.task.findUnique({ where: { id } });
         const projectUser = await this.prisma.projectUser.findUnique({
             where: {
                 user_id_project_id: {
@@ -363,10 +380,13 @@ export class TasksService {
                 }
             }
         });
-        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
 
-        const task = await this.prisma.task.findUnique({ where: { id } });
-        if (!task) throw new BadRequestException('Task not found');
+        if (
+            !projectUser
+            || projectUser.delete_at
+            || projectUser.id !== task.assignee_id
+            || projectUser.id !== task.reporter_id
+        ) throw new BadRequestException('No permission');
 
         await this.prisma.task.delete({ where: { id } });
 

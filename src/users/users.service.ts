@@ -9,35 +9,27 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
     constructor(private prisma: PrismaService) { }
 
-    async getAllUsers(req: Request) {
-        const { sub: user_id } = req.user as ReqUser;
-
+    async getAllUsers(keyword: string) {
         return await this.prisma.user.findMany({
             select: {
                 id: true,
                 fullname: true,
                 email: true,
                 avatar: true,
-                project_users: {
-                    select: {
-                        project_id: true,
-                        delete_at: true,
-                    }
-                },
-                team_users: {
-                    select: {
-                        team_id: true,
-                        delete_at: true,
-                    }
-                }
             },
             where: {
-                AND: [
+                OR: [
                     {
-                        NOT: { id: user_id },
+                        email: {
+                            contains: keyword,
+                            mode: 'insensitive',
+                        }
                     },
                     {
-                        is_verify: true,
+                        fullname: {
+                            contains: keyword,
+                            mode: 'insensitive',
+                        }
                     },
                 ]
             }

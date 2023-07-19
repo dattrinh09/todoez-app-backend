@@ -30,7 +30,14 @@ export class NotesService {
         });
     }
 
-    async getNotes(req: Request, team_id: number, page: number, limit: number) {
+    async getNotes(
+        req: Request,
+        team_id: number,
+        keyword: string,
+        creator_id: number,
+        page: number,
+        limit: number
+    ) {
         const { sub: user_id } = req.user as ReqUser;
 
         const user = await this.prisma.teamUser.findUnique({
@@ -49,6 +56,15 @@ export class NotesService {
                 user: {
                     team_id,
                 },
+                AND: [
+                    {
+                        content: {
+                            contains: keyword,
+                            mode: 'insensitive'
+                        }
+                    },
+                    { user_id: creator_id ? creator_id : undefined },
+                ]
             },
         })
 
@@ -75,6 +91,15 @@ export class NotesService {
                 user: {
                     team_id,
                 },
+                AND: [
+                    {
+                        content: {
+                            contains: keyword,
+                            mode: 'insensitive'
+                        }
+                    },
+                    { user_id: creator_id ? creator_id : undefined },
+                ]
             },
             skip: (page - 1) * limit,
             take: limit,
