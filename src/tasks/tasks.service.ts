@@ -182,6 +182,13 @@ export class TasksService {
                         }
                     },
                 ],
+                NOT: [
+                    {
+                        status: {
+                            contains: 'resolve',
+                        }
+                    },
+                ],
             }
         });
 
@@ -225,10 +232,17 @@ export class TasksService {
                         }
                     },
                 ],
+                NOT: [
+                    {
+                        status: {
+                            contains: 'resolve',
+                        }
+                    },
+                ],
             },
             skip: (page - 1) * limit,
             take: limit,
-            orderBy: { create_at: 'desc' },
+            orderBy: { end_at: 'asc' },
         });
 
         return {
@@ -306,8 +320,8 @@ export class TasksService {
                 }
             }
         });
-        
-        
+
+
         if (
             !projectUser
             || projectUser.delete_at
