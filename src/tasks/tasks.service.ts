@@ -321,18 +321,14 @@ export class TasksService {
             }
         });
 
-
-        if (
-            !projectUser
-            || projectUser.delete_at
-            || projectUser.id !== task.assignee_id
-            || projectUser.id !== task.reporter_id
-        ) throw new BadRequestException('No permission');
+        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
+        if (projectUser.id !== task.assignee_id && projectUser.id !== task.reporter_id)
+            throw new BadRequestException('No permission');
 
         return await this.prisma.task.update({
             where: { id },
             data: { ...dto },
-        })
+        });
     }
 
     async updateTask(req: Request, project_id: number, id: number, dto: TaskUpdateDto) {
@@ -350,12 +346,9 @@ export class TasksService {
             }
         });
 
-        if (
-            !projectUser
-            || projectUser.delete_at
-            || projectUser.id !== task.assignee_id
-            || projectUser.id !== task.reporter_id
-        ) throw new BadRequestException('No permission');
+        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
+        if (projectUser.id !== task.assignee_id && projectUser.id !== task.reporter_id)
+            throw new BadRequestException('No permission');
 
         const sprint = await this.prisma.sprint.findUnique({
             where: { id: sprint_id }
@@ -394,13 +387,10 @@ export class TasksService {
                 }
             }
         });
-
-        if (
-            !projectUser
-            || projectUser.delete_at
-            || projectUser.id !== task.assignee_id
-            || projectUser.id !== task.reporter_id
-        ) throw new BadRequestException('No permission');
+        
+        if (!projectUser || projectUser.delete_at) throw new BadRequestException('No permission');
+        if (projectUser.id !== task.assignee_id && projectUser.id !== task.reporter_id)
+            throw new BadRequestException('No permission');
 
         await this.prisma.task.delete({ where: { id } });
 
