@@ -10,7 +10,7 @@ export class TasksService {
 
     async createTask(req: Request, project_id: number, dto: TaskCreateDto) {
         const { sub: user_id } = req.user as ReqUser;
-        const { sprint_id, assignee_id } = dto;
+        const { end_at, sprint_id, assignee_id } = dto;
 
         const reporter = await this.prisma.projectUser.findUnique({
             where: {
@@ -35,6 +35,7 @@ export class TasksService {
         return await this.prisma.task.create({
             data: {
                 ...dto,
+                end_at: new Date(end_at),
                 reporter_id: reporter.id,
             }
         })
