@@ -28,6 +28,13 @@ export class SigninDto {
     public password: string;
 }
 
+export class AccountVerifyDto {
+    @IsNotEmpty()
+    @IsEmail()
+    @IsString()
+    public email: string;
+}
+
 export class GoogleSigninDto {
     @IsNotEmpty()
     @IsString()

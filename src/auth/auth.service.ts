@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { GoogleSigninDto, RefreshTokenDto, ResetPasswordDto, SigninDto, SignupDto } from './dto/auth.dto';
+import { AccountVerifyDto, GoogleSigninDto, RefreshTokenDto, ResetPasswordDto, SigninDto, SignupDto } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -38,7 +38,7 @@ export class AuthService {
         const token = await this.signToken(createdUser.id, createdUser.email);
         if (!token) throw new BadRequestException('Wrong credentials');
 
-        const link = this.getVerifyUrl("verify-email", createdUser.email, token);
+        const link = this.getVerifyUrl("verify-account", createdUser.email, token);
 
         await this.mailer.sendMail({
             to: createdUser.email,
@@ -77,7 +77,8 @@ export class AuthService {
         return { message: 'Verify email successfully' };
     }
 
-    async forgotPassword(email: string) {
+    async forgotPassword(dto: AccountVerifyDto) {
+        const { email } = dto;
         const foundUser = await this.prisma.user.findUnique({ where: { email } });
         if (!foundUser) throw new BadRequestException('Email does not exists');
         if (!foundUser.hash_password) throw new BadRequestException('This email use for google signin');
@@ -94,7 +95,29 @@ export class AuthService {
             html: `<div>Click <a href='${link}'>here</a> to reset your account password </div>`,
         });
 
-        return { mssage: 'Email exists' };
+        return { message: 'Email exists' };
+    }
+
+    
+    async verifyAccount(dto: AccountVerifyDto) {
+        const { email } = dto;
+        const foundUser = await this.prisma.user.findUnique({ where: { email } });
+        if (!foundUser) throw new BadRequestException('Email does not exists');
+        if (!foundUser.hash_password) throw new BadRequestException('This email use for google signin');
+        if (foundUser.is_verify) throw new BadRequestException('Account is verify');
+
+        const token = await this.signToken(foundUser.id, foundUser.email);
+        if (!token) throw new BadRequestException('Wrong credentials');
+
+        const link = this.getVerifyUrl("verify-account", foundUser.email, token);
+
+        await this.mailer.sendMail({
+            to: foundUser.email,
+            subject: 'Verify account',
+            html: `<div>Click <a href='${link}'>here</a> to verify your account</div>`,
+        });
+
+        return { message: 'Verify account successfully' };
     }
 
     async resetPassword(email: string, dto: ResetPasswordDto) {
@@ -125,7 +148,7 @@ export class AuthService {
         const isMatch = await this.compareHashData(password, foundUser.hash_password);
         if (!isMatch) throw new BadRequestException('Password is not correct');
 
-        if (!foundUser.is_verify) throw new BadRequestException('Account is not verify');
+        if (!foundUser.is_verify) throw new BadRequestException('ACCOUNT_NOT_VERIFY');
 
         const token = await this.signToken(foundUser.id, foundUser.email);
 

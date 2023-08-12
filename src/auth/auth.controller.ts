@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Put, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GoogleSigninDto, RefreshTokenDto, ResetPasswordDto, SigninDto, SignupDto } from './dto/auth.dto';
+import { AccountVerifyDto, GoogleSigninDto, RefreshTokenDto, ResetPasswordDto, SigninDto, SignupDto } from './dto/auth.dto';
 import { Public } from './decorators/public.decorator';
 
 @Controller('auth')
@@ -32,9 +32,15 @@ export class AuthController {
   }
 
   @Public()
-  @Get('/forgot/:email')
-  async forgotPassword(@Param() params: { email: string }) {
-    return await this.authService.forgotPassword(params.email);
+  @Post('/forgot')
+  async forgotPassword(@Body() dto: AccountVerifyDto) {
+    return await this.authService.forgotPassword(dto);
+  }
+
+  @Public()
+  @Post('/verify-account')
+  async verifyAccount(@Body() dto: AccountVerifyDto) {
+    return await this.authService.verifyAccount(dto);
   }
 
   @Public()
